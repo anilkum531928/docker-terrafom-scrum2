@@ -41,3 +41,11 @@
 *.tfvars.json
 backend.generated.tf
 backend.generated.hcl
+
+.terraform/
+*.tfstate
+*.tfstate.*
+.terraform.lock.hcl
+crash.log
+*.tfvars
+*.tfvars.json

@@ -1,4 +1,10 @@
+provider "aws" {
+  region = var.aws_region
+}
+
+# Find the latest Amazon Linux 2023 AMI
 data "aws_ami" "amazon_linux" {
+
   most_recent = true
 
   owners = ["amazon"]
@@ -14,6 +20,8 @@ data "aws_ami" "amazon_linux" {
   }
 }
 
+
+# Create EC2 instance
 resource "aws_instance" "docker_server" {
 
   ami           = data.aws_ami.amazon_linux.id
@@ -22,14 +30,26 @@ resource "aws_instance" "docker_server" {
   user_data = <<-EOF
               #!/bin/bash
 
+              # Update packages
               dnf update -y
 
+              # Install Docker
               dnf install -y docker
 
-              systemctl enable docker
+              # Start Docker
               systemctl start docker
 
+              # Enable Docker after reboot
+              systemctl enable docker
+
+              # Add ec2-user to docker group
               usermod -aG docker ec2-user
+
+              # Verify Docker service
+              systemctl is-active docker > /tmp/docker-status.txt
+
+              # Store Docker version
+              docker --version > /tmp/docker-version.txt
               EOF
 
   tags = {

@@ -1,6 +1,11 @@
-name: AWS Authentication Test
+name: Terraform EC2 Docker
 
 on:
+
+  push:
+    branches:
+      - future-branch-docker
+
   workflow_dispatch:
 
 permissions:
@@ -8,20 +13,94 @@ permissions:
   contents: read
 
 jobs:
-  test:
+
+  terraform:
+
+    name: Create EC2 and Install Docker
+
     runs-on: ubuntu-latest
 
     steps:
 
+      # ------------------------------------------------
+      # 1. Checkout repository
+      # ------------------------------------------------
+
       - name: Checkout code
         uses: actions/checkout@v4
+
+
+      # ------------------------------------------------
+      # 2. Authenticate GitHub Actions with AWS
+      # ------------------------------------------------
 
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v5
         with:
           role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
-          aws-region: ap-south-1
+          aws-region: us-east-1
+
+
+      # ------------------------------------------------
+      # 3. Verify AWS authentication
+      # ------------------------------------------------
 
       - name: Verify AWS identity
         run: |
           aws sts get-caller-identity
+
+
+      # ------------------------------------------------
+      # 4. Install Terraform
+      # ------------------------------------------------
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+
+
+      # ------------------------------------------------
+      # 5. Terraform initialization
+      # ------------------------------------------------
+
+      - name: Terraform Init
+        run: terraform init
+
+
+      # ------------------------------------------------
+      # 6. Terraform formatting
+      # ------------------------------------------------
+
+      - name: Terraform Format Check
+        run: terraform fmt -check
+
+
+      # ------------------------------------------------
+      # 7. Terraform validation
+      # ------------------------------------------------
+
+      - name: Terraform Validate
+        run: terraform validate
+
+
+      # ------------------------------------------------
+      # 8. Terraform plan
+      # ------------------------------------------------
+
+      - name: Terraform Plan
+        run: terraform plan
+
+
+      # ------------------------------------------------
+      # 9. Terraform apply
+      # ------------------------------------------------
+
+      - name: Terraform Apply
+        run: terraform apply -auto-approve
+
+
+      # ------------------------------------------------
+      # 10. Display Terraform outputs
+      # ------------------------------------------------
+
+      - name: Terraform Output
+        run: terraform output
