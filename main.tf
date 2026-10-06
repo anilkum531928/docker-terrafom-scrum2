@@ -1,7 +1,3 @@
-provider "aws" {
-  region = var.aws_region
-}
-
 # Find the latest Amazon Linux 2023 AMI
 data "aws_ami" "amazon_linux" {
 
